@@ -3,28 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Lectures</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
-        h1 { border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }
-        .book { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 5px; border-left: 4px solid #0366d6; }
-        .book h3 { margin: 0 0 5px 0; }
-        .author { color: #586069; font-style: italic; }
-    </style>
+    <title>Bibliothèque & Tiers - Noctra Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>📚 Mon suivi de lectures</h1>
-    
-    <div class="book">
-        <h3>Titre du premier livre</h3>
-        <p class="author">Auteur : Nom de l'auteur</p>
-        <p>Mon avis ou un petit résumé de ce que j'ai pensé de ce livre.</p>
+
+    <header>
+        <h1>Constellations & Lectures</h1>
+        <p>ARCHIVE STATIQUE DES ŒUVRES ET CLASSEMENTS</p>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="switchView('tiers')">Vue par Tiers</button>
+        <button class="nav-btn" onclick="switchView('authors')">Classement Auteurs</button>
+        <button class="nav-btn" onclick="switchView('admin')">+ Ajouter / Gérer</button>
+    </nav>
+
+    <div class="container">
+        <!-- VUE PAR TIERS -->
+        <div id="view-tiers" class="view-section active">
+            <div id="tiers-container"></div>
+        </div>
+
+        <!-- VUE CLASSEMENT AUTEURS -->
+        <div id="view-authors" class="view-section">
+            <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--accent);">Ranking des Auteurs</h2>
+            <div id="ranking-container" class="ranking-list"></div>
+        </div>
+
+        <!-- VUE DETAIL AUTEUR -->
+        <div id="view-author-detail" class="view-section">
+            <button onclick="switchView('authors')" class="back-btn">← Retour au classement</button>
+            <div id="author-detail-content"></div>
+        </div>
+
+        <!-- VUE AJOUT / GESTION -->
+        <div id="view-admin" class="view-section">
+            <div class="admin-box">
+                <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--accent);">Ajouter une lecture</h2>
+                <form id="add-book-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label>Titre du livre</label>
+                        <input type="text" id="book-title" required placeholder="ex: Hypérion">
+                    </div>
+                    <div class="form-group">
+                        <label>Auteur</label>
+                        <input type="text" id="book-author" required placeholder="ex: Dan Simmons">
+                    </div>
+                    <div class="form-group">
+                        <label>Tier</label>
+                        <select id="book-tier">
+                            <option value="Tier S">Tier S (Chefs-d'œuvre)</option>
+                            <option value="Tier A">Tier A (Excellents)</option>
+                            <option value="Tier B">Tier B (Bons)</option>
+                            <option value="Tier C">Tier C (Moyens)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Note sur 10</label>
+                        <input type="number" id="book-score" min="0" max="10" step="0.5" required placeholder="ex: 9.5">
+                    </div>
+                    <button type="submit" class="submit-btn">Enregistrer le livre</button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div class="book">
-        <h3>Titre du deuxième livre</h3>
-        <p class="author">Auteur : Nom de l'auteur</p>
-        <p>Mon avis ou un petit résumé...</p>
-    </div>
+    <script src="app.js"></script>
 </body>
 </html>
