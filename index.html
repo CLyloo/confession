@@ -16,8 +16,9 @@
 
     <nav>
         <button class="nav-btn active" onclick="switchView('tiers')">Vue par Tiers</button>
+        <button class="nav-btn" onclick="switchView('all-books')">Tous les livres</button>
         <button class="nav-btn" onclick="switchView('authors')">Classement Auteurs</button>
-        <button class="nav-btn" onclick="switchView('admin')">+ Ajouter / Gérer</button>
+        <button class="nav-btn" onclick="switchView('admin')">+ Ajouter</button>
     </nav>
 
     <div class="container">
@@ -26,9 +27,35 @@
             <div id="tiers-container"></div>
         </div>
 
+        <!-- VUE TOUS LES LIVRES (GRANDE PAGE) -->
+        <div id="view-all-books" class="view-section">
+            <div class="section-header">
+                <h2>Répertoire Global</h2>
+                <div class="sort-controls">
+                    <label>Trier par : </label>
+                    <select id="global-sort-select" onchange="renderAllBooks()">
+                        <option value="title">Titre</option>
+                        <option value="author">Auteur</option>
+                        <option value="year">Année</option>
+                        <option value="tier">Tier</option>
+                    </select>
+                </div>
+            </div>
+            <div id="all-books-container" class="book-list-vertical"></div>
+        </div>
+
         <!-- VUE CLASSEMENT AUTEURS -->
         <div id="view-authors" class="view-section">
-            <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--accent);">Ranking des Auteurs</h2>
+            <div class="section-header">
+                <h2>Ranking des Auteurs</h2>
+                <div class="sort-controls">
+                    <label>Trier par : </label>
+                    <select id="author-sort-select" onchange="renderAuthorsRanking()">
+                        <option value="score">Score moyen</option>
+                        <option value="alpha">Alphabétique (A-Z)</option>
+                    </select>
+                </div>
+            </div>
             <div id="ranking-container" class="ranking-list"></div>
         </div>
 
@@ -38,7 +65,13 @@
             <div id="author-detail-content"></div>
         </div>
 
-        <!-- VUE AJOUT / GESTION -->
+        <!-- VUE DETAIL LIVRE / MODIFICATION -->
+        <div id="view-book-detail" class="view-section">
+            <button onclick="switchView('tiers')" class="back-btn">← Retour</button>
+            <div id="book-detail-content" class="admin-box" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- VUE AJOUT -->
         <div id="view-admin" class="view-section">
             <div class="admin-box">
                 <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--accent);">Ajouter une lecture</h2>
@@ -52,17 +85,25 @@
                         <input type="text" id="book-author" required placeholder="ex: Dan Simmons">
                     </div>
                     <div class="form-group">
-                        <label>Tier</label>
+                        <label>Année de parution</label>
+                        <input type="number" id="book-year" required placeholder="ex: 1989">
+                    </div>
+                    <div class="form-group">
+                        <label>Tier (Définit la note de l'auteur)</label>
                         <select id="book-tier">
-                            <option value="Tier S">Tier S (Chefs-d'œuvre)</option>
-                            <option value="Tier A">Tier A (Excellents)</option>
-                            <option value="Tier B">Tier B (Bons)</option>
-                            <option value="Tier C">Tier C (Moyens)</option>
+                            <option value="Tier S">Tier S (Note 10)</option>
+                            <option value="Tier A">Tier A (Note 8)</option>
+                            <option value="Tier B">Tier B (Note 6)</option>
+                            <option value="Tier C">Tier C (Note 4)</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Note sur 10</label>
-                        <input type="number" id="book-score" min="0" max="10" step="0.5" required placeholder="ex: 9.5">
+                        <label>Descriptif</label>
+                        <textarea id="book-desc" rows="3" placeholder="Résumé ou description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Commentaire personnel</label>
+                        <textarea id="book-comment" rows="3" placeholder="Votre avis..."></textarea>
                     </div>
                     <button type="submit" class="submit-btn">Enregistrer le livre</button>
                 </form>
