@@ -3,126 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque & Tiers - Minimal Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>Bibliothèque & Auteurs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div class="container">
     <header>
-        <h1>Constellations & Lectures</h1>
-        <p>ARCHIVE STATIQUE DES ŒUVRES ET CLASSEMENTS</p>
+        <h1 id="page-title">Bibliothèque</h1>
+        <div class="nav-buttons">
+            <button id="nav-books" class="active" onclick="switchView('books')">📚 Livres</button>
+            <button id="nav-authors" onclick="switchView('authors')">✍️ Auteurs</button>
+            <button onclick="openAddBookModal()">+ Ajouter un livre</button>
+        </div>
     </header>
 
-    <nav>
-        <button class="nav-btn active" onclick="switchView('tiers')">Vue par Tiers</button>
-        <button class="nav-btn" onclick="switchView('all-books')">Tous les livres</button>
-        <button class="nav-btn" onclick="switchView('authors')">Classement Auteurs</button>
-        <button class="nav-btn" onclick="switchView('admin')">+ Ajouter</button>
-    </nav>
-
-    <div class="container">
-        <!-- VUE PAR TIERS -->
-        <div id="view-tiers" class="view-section active">
-            <div id="tiers-container"></div>
-        </div>
-
-        <!-- VUE TOUS LES LIVRES -->
-        <div id="view-all-books" class="view-section">
-            <div class="section-header">
-                <h2>Répertoire Global</h2>
-                <div class="sort-controls">
-                    <label>Trier par : </label>
-                    <select id="global-sort-select" onchange="renderAllBooks()">
-                        <option value="author">Auteur</option>
-                        <option value="title">Titre</option>
-                        <option value="year">Année</option>
-                        <option value="tier">Tier</option>
-                    </select>
-                </div>
+    <!-- VUE LIVRES -->
+    <div id="view-books">
+        <div class="toolbar">
+            <div class="filters-group">
+                <label>Filtre :</label>
+                <select id="tag-filter" onchange="renderBooks()">
+                    <option value="">Tous les descripteurs (#)</option>
+                </select>
+                <select id="rating-filter" onchange="renderBooks()">
+                    <option value="">Toutes les notes</option>
+                    <option value="5">★★★★★ (5)</option>
+                    <option value="4">★★★★☆ (4)</option>
+                    <option value="3">★★★☆☆ (3)</option>
+                    <option value="2">★★☆☆☆ (2)</option>
+                    <option value="1">★☆☆☆☆ (1)</option>
+                </select>
             </div>
-            <div class="table-container">
-                <table class="minimal-table">
-                    <thead>
-                        <tr>
-                            <th>Auteur</th>
-                            <th>Release / Titre</th>
-                            <th>Année</th>
-                            <th>Tags</th>
-                        </tr>
-                    </thead>
-                    <tbody id="all-books-tbody"></tbody>
-                </table>
+            <div class="filters-group">
+                <label>Recherche :</label>
+                <input type="text" id="search-input" placeholder="Filtrer..." oninput="renderBooks()">
             </div>
         </div>
 
-        <!-- VUE CLASSEMENT AUTEURS -->
-        <div id="view-authors" class="view-section">
-            <div class="section-header">
-                <h2>Ranking des Auteurs</h2>
-                <div class="sort-controls">
-                    <label>Trier par : </label>
-                    <select id="author-sort-select" onchange="renderAuthorsRanking()">
-                        <option value="score">Score moyen</option>
-                        <option value="alpha">Alphabétique (A-Z)</option>
-                    </select>
-                </div>
-            </div>
-            <div id="ranking-container" class="ranking-list"></div>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-author" onclick="setSort('author')">Auteur ↕</th>
+                    <th class="col-title" onclick="setSort('title')">Titre ↕</th>
+                    <th class="col-tags">Descripteurs</th>
+                    <th class="col-year" onclick="setSort('year')">Année ↕</th>
+                    <th class="col-rating" onclick="setSort('rating')">Note ↕</th>
+                </tr>
+            </thead>
+            <tbody id="books-tbody">
+                <!-- Rempli par JS -->
+            </tbody>
+        </table>
+    </div>
 
-        <!-- VUE DETAIL AUTEUR -->
-        <div id="view-author-detail" class="view-section">
-            <button onclick="switchView('authors')" class="back-btn">← Retour au classement</button>
-            <div id="author-detail-content"></div>
-        </div>
+    <!-- VUE AUTEURS -->
+    <div id="view-authors" style="display: none;">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-author-name" onclick="setAuthorSort('name')">Auteur ↕</th>
+                    <th class="col-author-count" onclick="setAuthorSort('count')">Livres lus ↕</th>
+                    <th class="col-author-avg" onclick="setAuthorSort('avgRating')">Note Moyenne ↕</th>
+                </tr>
+            </thead>
+            <tbody id="authors-tbody">
+                <!-- Rempli par JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        <!-- VUE DETAIL / MODIFICATION LIVRE -->
-        <div id="view-book-detail" class="view-section">
-            <button onclick="switchView('tiers')" class="back-btn">← Retour</button>
-            <div id="book-detail-content" class="admin-box" style="margin-top: 20px;"></div>
+<!-- MODAL AJOUT / EDITION LIVRE -->
+<div id="book-modal" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-book-title">Ajouter / Modifier un livre</h3>
+        <input type="hidden" id="book-edit-id">
+        <div class="form-group">
+            <label>Auteur :</label>
+            <input type="text" id="input-author" placeholder="Ex: Victor Hugo">
         </div>
-
-        <!-- VUE AJOUT -->
-        <div id="view-admin" class="view-section">
-            <div class="admin-box">
-                <h2>Ajouter une lecture</h2>
-                <form id="add-book-form" onsubmit="handleFormSubmit(event)">
-                    <div class="form-group">
-                        <label>Titre de l'œuvre</label>
-                        <input type="text" id="book-title" required placeholder="ex: Hypérion">
-                    </div>
-                    <div class="form-group">
-                        <label>Auteur</label>
-                        <input type="text" id="book-author" required placeholder="ex: Dan Simmons">
-                    </div>
-                    <div class="form-group">
-                        <label>Année de parution</label>
-                        <input type="number" id="book-year" required placeholder="ex: 1989">
-                    </div>
-                    <div class="form-group">
-                        <label>Tier (Définit la note de l'auteur)</label>
-                        <select id="book-tier">
-                            <option value="Tier S">Tier S (Note 10)</option>
-                            <option value="Tier A">Tier A (Note 8)</option>
-                            <option value="Tier B">Tier B (Note 6)</option>
-                            <option value="Tier C">Tier C (Note 4)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Tags (séparés par des virgules)</label>
-                        <input type="text" id="book-tags" placeholder="ex: Classics, Fiction, 19th Century">
-                    </div>
-                    <div class="form-group">
-                        <label>Commentaire personnel</label>
-                        <textarea id="book-comment" rows="3" placeholder="Votre avis..."></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">Enregistrer</button>
-                </form>
+        <div class="form-group">
+            <label>Titre :</label>
+            <input type="text" id="input-title" placeholder="Ex: Les Misérables">
+        </div>
+        <div class="form-group">
+            <label>Descripteurs (#séparés par des espaces) :</label>
+            <input type="text" id="input-tags" placeholder="#Classics #France #Fiction">
+        </div>
+        <div class="form-group">
+            <label>Année :</label>
+            <input type="number" id="input-year" placeholder="1862">
+        </div>
+        <div class="form-group">
+            <label>Note :</label>
+            <select id="input-rating">
+                <option value="5">★★★★★ (5)</option>
+                <option value="4">★★★★☆ (4)</option>
+                <option value="3">★★★☆☆ (3)</option>
+                <option value="2">★★☆☆☆ (2)</option>
+                <option value="1">★☆☆☆☆ (1)</option>
+            </select>
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="delete-btn" id="delete-book-btn" onclick="deleteCurrentBook()" style="display:none;">Supprimer</button>
+            <div>
+                <button type="button" onclick="closeModal('book-modal')">Annuler</button>
+                <button type="button" onclick="saveBook()">Enregistrer</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="app.js"></script>
+<!-- MODAL DETAILS / EDITION AUTEUR -->
+<div id="author-modal" class="modal">
+    <div class="modal-content" style="width: 550px;">
+        <h3 id="modal-author-title">Livres de l'auteur</h3>
+        <div id="author-books-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px; font-size: 0.9rem;">
+            <!-- Liste des livres de l'auteur cliquable pour modif -->
+        </div>
+        <div class="modal-buttons">
+            <span></span>
+            <button type="button" onclick="closeModal('author-modal')">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
