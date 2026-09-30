@@ -143,10 +143,9 @@
         th.col-year, td.col-year { width: 8%; text-align: right; font-family: 'Courier Prime', monospace; }
         th.col-rating, td.col-rating { width: 12%; text-align: right; font-family: 'Courier Prime', monospace; letter-spacing: 2px; }
 
-        /* Largeurs colonnes auteurs */
-        th.col-author-name, td.col-author-name { width: 50%; }
-        th.col-author-count, td.col-author-count { width: 25%; font-family: 'Courier Prime', monospace; }
-        th.col-author-avg, td.col-author-avg { width: 25%; text-align: right; font-family: 'Courier Prime', monospace; }
+        /* Largeurs colonnes auteurs (2 colonnes) */
+        th.col-author-name, td.col-author-name { width: 70%; }
+        th.col-author-avg, td.col-author-avg { width: 30%; text-align: right; font-family: 'Courier Prime', monospace; }
 
         .tag-badge {
             display: inline-block;
@@ -272,11 +271,18 @@
 
     <!-- VUE AUTEURS -->
     <div id="view-authors" style="display: none;">
+        <div class="toolbar">
+            <div class="filters-group"></div>
+            <div class="filters-group">
+                <label>Recherche :</label>
+                <input type="text" id="author-search-input" placeholder="Filtrer un auteur..." oninput="renderAuthors()">
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
                     <th class="col-author-name" onclick="setAuthorSort('name')">Auteur ↕</th>
-                    <th class="col-author-count" onclick="setAuthorSort('count')">Livres lus ↕</th>
                     <th class="col-author-avg" onclick="setAuthorSort('avgRating')">Note Moyenne ↕</th>
                 </tr>
             </thead>
@@ -343,7 +349,6 @@
 </div>
 
 <script>
-    // Données par défaut ou issues de LocalStorage
     let books = JSON.parse(localStorage.getItem('my_books_data')) || [
         { id: 1, author: "Luc Ferrari", title: "L'œuvre électronique", tags: "#Musique #Electro #Avangarde", year: 2009, rating: 5 },
         { id: 2, author: "Orchestre et chœur de la Radio-Télévision de Cracovie", title: "Œuvre intégrale pour chœur et orchestre symphonique", tags: "#Classique #Symphonie", year: 1990, rating: 5 },
@@ -382,7 +387,6 @@
         const selectedTag = document.getElementById('tag-filter').value;
         const selectedRating = document.getElementById('rating-filter').value;
 
-        // Mise à jour de la liste déroulante des tags
         updateTagDropdown();
 
         let filtered = books.filter(b => {
@@ -392,7 +396,6 @@
             return matchesSearch && matchesTag && matchesRating;
         });
 
-        // Tri
         filtered.sort((a, b) => {
             let valA = a[currentSort.field];
             let valB = b[currentSort.field];
@@ -410,7 +413,6 @@
             tr.className = 'clickable-row';
             tr.onclick = () => openEditBookModal(book.id);
 
-            // Formatage des tags en badges cliquables
             let tagsHtml = book.tags.split(' ').map(tag => {
                 if(!tag.startsWith('#')) return tag;
                 return `<span class="tag-badge" onclick="event.stopPropagation(); filterByTag('${tag}')">${tag}</span>`;
@@ -467,7 +469,8 @@
         const tbody = document.getElementById('authors-tbody');
         tbody.innerHTML = '';
 
-        // Regrouper par auteur
+        const authorSearch = document.getElementById('author-search-input').value.toLowerCase();
+
         let authorMap = {};
         books.forEach(b => {
             if (!authorMap[b.author]) {
@@ -480,13 +483,11 @@
         let authorsList = Object.values(authorMap).map(a => {
             return {
                 name: a.name,
-                count: a.books.length,
                 avgRating: (a.totalRating / a.books.length).toFixed(2),
                 books: a.books
             };
-        });
+        }).filter(a => a.name.toLowerCase().includes(authorSearch));
 
-        // Tri
         authorsList.sort((a, b) => {
             let valA = a[currentAuthorSort.field];
             let valB = b[currentAuthorSort.field];
@@ -505,7 +506,6 @@
             tr.onclick = () => openAuthorDetails(auth.name);
             tr.innerHTML = `
                 <td class="col-author-name">${escapeHtml(auth.name)}</td>
-                <td class="col-author-count">${auth.count} livre(s)</td>
                 <td class="col-author-avg">${auth.avgRating} / 5</td>
             `;
             tbody.appendChild(tr);
@@ -592,7 +592,6 @@
         }
 
         if (id) {
-            // Modification
             const book = books.find(b => b.id == id);
             if(book) {
                 book.author = author;
@@ -602,7 +601,6 @@
                 book.rating = rating;
             }
         } else {
-            // Ajout
             const newId = books.length > 0 ? Math.max(...books.map(b => b.id)) + 1 : 1;
             books.push({ id: newId, author, title, tags, year, rating });
         }
@@ -632,7 +630,6 @@
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    // Initialisation au chargement
     renderBooks();
 </script>
 
