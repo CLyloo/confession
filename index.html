@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque & Tiers - Noctra Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>Bibliothèque & Tiers - Minimal Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,21 +27,33 @@
             <div id="tiers-container"></div>
         </div>
 
-        <!-- VUE TOUS LES LIVRES (GRANDE PAGE) -->
+        <!-- VUE TOUS LES LIVRES -->
         <div id="view-all-books" class="view-section">
             <div class="section-header">
                 <h2>Répertoire Global</h2>
                 <div class="sort-controls">
                     <label>Trier par : </label>
                     <select id="global-sort-select" onchange="renderAllBooks()">
-                        <option value="title">Titre</option>
                         <option value="author">Auteur</option>
+                        <option value="title">Titre</option>
                         <option value="year">Année</option>
                         <option value="tier">Tier</option>
                     </select>
                 </div>
             </div>
-            <div id="all-books-container" class="book-list-vertical"></div>
+            <div class="table-container">
+                <table class="minimal-table">
+                    <thead>
+                        <tr>
+                            <th>Auteur</th>
+                            <th>Release / Titre</th>
+                            <th>Année</th>
+                            <th>Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-books-tbody"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- VUE CLASSEMENT AUTEURS -->
@@ -65,7 +77,7 @@
             <div id="author-detail-content"></div>
         </div>
 
-        <!-- VUE DETAIL LIVRE / MODIFICATION -->
+        <!-- VUE DETAIL / MODIFICATION LIVRE -->
         <div id="view-book-detail" class="view-section">
             <button onclick="switchView('tiers')" class="back-btn">← Retour</button>
             <div id="book-detail-content" class="admin-box" style="margin-top: 20px;"></div>
@@ -74,10 +86,10 @@
         <!-- VUE AJOUT -->
         <div id="view-admin" class="view-section">
             <div class="admin-box">
-                <h2 style="margin-bottom: 20px; font-size: 1.2rem; color: var(--accent);">Ajouter une lecture</h2>
+                <h2>Ajouter une lecture</h2>
                 <form id="add-book-form" onsubmit="handleFormSubmit(event)">
                     <div class="form-group">
-                        <label>Titre du livre</label>
+                        <label>Titre de l'œuvre</label>
                         <input type="text" id="book-title" required placeholder="ex: Hypérion">
                     </div>
                     <div class="form-group">
@@ -98,14 +110,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Descriptif</label>
-                        <textarea id="book-desc" rows="3" placeholder="Résumé ou description..."></textarea>
+                        <label>Tags (séparés par des virgules)</label>
+                        <input type="text" id="book-tags" placeholder="ex: Classics, Fiction, 19th Century">
                     </div>
                     <div class="form-group">
                         <label>Commentaire personnel</label>
                         <textarea id="book-comment" rows="3" placeholder="Votre avis..."></textarea>
                     </div>
-                    <button type="submit" class="submit-btn">Enregistrer le livre</button>
+                    <button type="submit" class="submit-btn">Enregistrer</button>
                 </form>
             </div>
         </div>
