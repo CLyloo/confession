@@ -5,7 +5,219 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bibliothèque & Auteurs</title>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-color: #111111;
+            --border-color: #d1cbd5;
+            --hover-color: #f0ece9;
+            --accent-color: #2c2522;
+        }
+
+        body {
+            font-family: 'Newsreader', Georgia, serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--text-color);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button, .btn {
+            font-family: 'Courier Prime', monospace;
+            background: none;
+            border: 1px solid var(--text-color);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        button:hover, .btn:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        button.active {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.85rem;
+        }
+
+        .filters-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        select, input {
+            font-family: 'Courier Prime', monospace;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            padding: 5px 8px;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            table-layout: fixed;
+        }
+
+        th {
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--text-color);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            color: #666;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        tr.clickable-row {
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        tr.clickable-row:hover {
+            background-color: var(--hover-color);
+        }
+
+        /* Largeurs colonnes livres */
+        th.col-author, td.col-author { width: 26%; }
+        th.col-title, td.col-title { width: 34%; }
+        th.col-tags, td.col-tags { width: 20%; font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: #555; }
+        th.col-year, td.col-year { width: 8%; text-align: right; font-family: 'Courier Prime', monospace; }
+        th.col-rating, td.col-rating { width: 12%; text-align: right; font-family: 'Courier Prime', monospace; letter-spacing: 2px; }
+
+        /* Largeurs colonnes auteurs */
+        th.col-author-name, td.col-author-name { width: 50%; }
+        th.col-author-count, td.col-author-count { width: 25%; font-family: 'Courier Prime', monospace; }
+        th.col-author-avg, td.col-author-avg { width: 25%; text-align: right; font-family: 'Courier Prime', monospace; }
+
+        .tag-badge {
+            display: inline-block;
+            background: #eee;
+            padding: 2px 5px;
+            margin: 1px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .tag-badge:hover {
+            background: #dcd6df;
+        }
+
+        /* Modal Overlay */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            border: 1px solid var(--text-color);
+            padding: 25px;
+            width: 420px;
+            max-width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            font-family: 'Courier Prime', monospace;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.85rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .delete-btn {
+            border-color: #b00;
+            color: #b00;
+        }
+        .delete-btn:hover {
+            background-color: #b00;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
 
@@ -130,6 +342,299 @@
     </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+    // Données par défaut ou issues de LocalStorage
+    let books = JSON.parse(localStorage.getItem('my_books_data')) || [
+        { id: 1, author: "Luc Ferrari", title: "L'œuvre électronique", tags: "#Musique #Electro #Avangarde", year: 2009, rating: 5 },
+        { id: 2, author: "Orchestre et chœur de la Radio-Télévision de Cracovie", title: "Œuvre intégrale pour chœur et orchestre symphonique", tags: "#Classique #Symphonie", year: 1990, rating: 5 },
+        { id: 3, author: "Bernard Parmegiani", title: "L'œuvre musicale", tags: "#Electro #Acousmatique", year: 2008, rating: 5 },
+        { id: 4, author: "Henri Pousseur", title: "Paysages planétaires", tags: "#Classique #Contemporain", year: 2004, rating: 4 },
+        { id: 5, author: "Victor Hugo", title: "Les Misérables", tags: "#Classics #France #Fiction #19thCentury", year: 1862, rating: 5 },
+        { id: 6, author: "Gustave Flaubert", title: "Madame Bovary", tags: "#Classics #France #Fiction", year: 1857, rating: 4 }
+    ];
+
+    let currentView = 'books';
+    let currentSort = { field: 'author', asc: true };
+    let currentAuthorSort = { field: 'name', asc: true };
+
+    function saveData() {
+        localStorage.setItem('my_books_data', JSON.stringify(books));
+    }
+
+    function switchView(view) {
+        currentView = view;
+        document.getElementById('nav-books').classList.toggle('active', view === 'books');
+        document.getElementById('nav-authors').classList.toggle('active', view === 'authors');
+        document.getElementById('view-books').style.display = view === 'books' ? 'block' : 'none';
+        document.getElementById('view-authors').style.display = view === 'authors' ? 'block' : 'none';
+        document.getElementById('page-title').innerText = view === 'books' ? 'Bibliothèque' : 'Auteurs';
+
+        if (view === 'books') renderBooks();
+        if (view === 'authors') renderAuthors();
+    }
+
+    // --- GESTION DES LIVRES ---
+    function renderBooks() {
+        const tbody = document.getElementById('books-tbody');
+        tbody.innerHTML = '';
+
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const selectedTag = document.getElementById('tag-filter').value;
+        const selectedRating = document.getElementById('rating-filter').value;
+
+        // Mise à jour de la liste déroulante des tags
+        updateTagDropdown();
+
+        let filtered = books.filter(b => {
+            const matchesSearch = b.author.toLowerCase().includes(search) || b.title.toLowerCase().includes(search) || b.tags.toLowerCase().includes(search);
+            const matchesTag = !selectedTag || b.tags.includes(selectedTag);
+            const matchesRating = !selectedRating || b.rating == selectedRating;
+            return matchesSearch && matchesTag && matchesRating;
+        });
+
+        // Tri
+        filtered.sort((a, b) => {
+            let valA = a[currentSort.field];
+            let valB = b[currentSort.field];
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+            if (valA < valB) return currentSort.asc ? -1 : 1;
+            if (valA > valB) return currentSort.asc ? 1 : -1;
+            return 0;
+        });
+
+        filtered.forEach(book => {
+            const tr = document.createElement('tr');
+            tr.className = 'clickable-row';
+            tr.onclick = () => openEditBookModal(book.id);
+
+            // Formatage des tags en badges cliquables
+            let tagsHtml = book.tags.split(' ').map(tag => {
+                if(!tag.startsWith('#')) return tag;
+                return `<span class="tag-badge" onclick="event.stopPropagation(); filterByTag('${tag}')">${tag}</span>`;
+            }).join(' ');
+
+            tr.innerHTML = `
+                <td class="col-author">${escapeHtml(book.author)}</td>
+                <td class="col-title">${escapeHtml(book.title)}</td>
+                <td class="col-tags">${tagsHtml}</td>
+                <td class="col-year">${book.year}</td>
+                <td class="col-rating">${'★'.repeat(book.rating)}${'☆'.repeat(5 - book.rating)}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function setSort(field) {
+        if (currentSort.field === field) {
+            currentSort.asc = !currentSort.asc;
+        } else {
+            currentSort.field = field;
+            currentSort.asc = true;
+        }
+        renderBooks();
+    }
+
+    function filterByTag(tag) {
+        document.getElementById('tag-filter').value = tag;
+        renderBooks();
+    }
+
+    function updateTagDropdown() {
+        const select = document.getElementById('tag-filter');
+        const currentVal = select.value;
+        let tagsSet = new Set();
+        books.forEach(b => {
+            b.tags.split(' ').forEach(t => {
+                if(t.startsWith('#')) tagsSet.add(t);
+            });
+        });
+
+        select.innerHTML = '<option value="">Tous les descripteurs (#)</option>';
+        Array.from(tagsSet).sort().forEach(tag => {
+            const opt = document.createElement('option');
+            opt.value = tag;
+            opt.textContent = tag;
+            select.appendChild(opt);
+        });
+        select.value = currentVal;
+    }
+
+    // --- GESTION DES AUTEURS ---
+    function renderAuthors() {
+        const tbody = document.getElementById('authors-tbody');
+        tbody.innerHTML = '';
+
+        // Regrouper par auteur
+        let authorMap = {};
+        books.forEach(b => {
+            if (!authorMap[b.author]) {
+                authorMap[b.author] = { name: b.author, books: [], totalRating: 0 };
+            }
+            authorMap[b.author].books.push(b);
+            authorMap[b.author].totalRating += b.rating;
+        });
+
+        let authorsList = Object.values(authorMap).map(a => {
+            return {
+                name: a.name,
+                count: a.books.length,
+                avgRating: (a.totalRating / a.books.length).toFixed(2),
+                books: a.books
+            };
+        });
+
+        // Tri
+        authorsList.sort((a, b) => {
+            let valA = a[currentAuthorSort.field];
+            let valB = b[currentAuthorSort.field];
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+            if (valA < valB) return currentAuthorSort.asc ? -1 : 1;
+            if (valA > valB) return currentAuthorSort.asc ? 1 : -1;
+            return 0;
+        });
+
+        authorsList.forEach(auth => {
+            const tr = document.createElement('tr');
+            tr.className = 'clickable-row';
+            tr.onclick = () => openAuthorDetails(auth.name);
+            tr.innerHTML = `
+                <td class="col-author-name">${escapeHtml(auth.name)}</td>
+                <td class="col-author-count">${auth.count} livre(s)</td>
+                <td class="col-author-avg">${auth.avgRating} / 5</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function setAuthorSort(field) {
+        if (currentAuthorSort.field === field) {
+            currentAuthorSort.asc = !currentAuthorSort.asc;
+        } else {
+            currentAuthorSort.field = field;
+            currentAuthorSort.asc = true;
+        }
+        renderAuthors();
+    }
+
+    function openAuthorDetails(authorName) {
+        document.getElementById('modal-author-title').innerText = `Auteur : ${authorName}`;
+        const container = document.getElementById('author-books-list');
+        container.innerHTML = '';
+
+        const authorBooks = books.filter(b => b.author === authorName);
+        authorBooks.forEach(b => {
+            const div = document.createElement('div');
+            div.style.padding = "8px 0";
+            div.style.borderBottom = "1px solid #ddd";
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            div.innerHTML = `
+                <div>
+                    <strong>${escapeHtml(b.title)}</strong> (${b.year})<br>
+                    <span style="font-size:0.8rem; color:#666;">${b.tags}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${'★'.repeat(b.rating)}${'☆'.repeat(5 - b.rating)}</span>
+                    <button onclick="closeModal('author-modal'); openEditBookModal(${b.id})">Modifier</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+
+        document.getElementById('author-modal').style.display = 'flex';
+    }
+
+    // --- MODALES ET FORMULAIRES ---
+    function openAddBookModal() {
+        document.getElementById('modal-book-title').innerText = "Ajouter un livre";
+        document.getElementById('book-edit-id').value = '';
+        document.getElementById('input-author').value = '';
+        document.getElementById('input-title').value = '';
+        document.getElementById('input-tags').value = '#';
+        document.getElementById('input-year').value = new Date().getFullYear();
+        document.getElementById('input-rating').value = '5';
+        document.getElementById('delete-book-btn').style.display = 'none';
+        document.getElementById('book-modal').style.display = 'flex';
+    }
+
+    function openEditBookModal(id) {
+        const book = books.find(b => b.id === id);
+        if(!book) return;
+        document.getElementById('modal-book-title').innerText = "Modifier le livre";
+        document.getElementById('book-edit-id').value = book.id;
+        document.getElementById('input-author').value = book.author;
+        document.getElementById('input-title').value = book.title;
+        document.getElementById('input-tags').value = book.tags;
+        document.getElementById('input-year').value = book.year;
+        document.getElementById('input-rating').value = book.rating;
+        document.getElementById('delete-book-btn').style.display = 'block';
+        document.getElementById('book-modal').style.display = 'flex';
+    }
+
+    function saveBook() {
+        const id = document.getElementById('book-edit-id').value;
+        const author = document.getElementById('input-author').value.trim();
+        const title = document.getElementById('input-title').value.trim();
+        const tags = document.getElementById('input-tags').value.trim();
+        const year = parseInt(document.getElementById('input-year').value) || 2026;
+        const rating = parseInt(document.getElementById('input-rating').value);
+
+        if(!author || !title) {
+            alert("L'auteur et le titre sont obligatoires.");
+            return;
+        }
+
+        if (id) {
+            // Modification
+            const book = books.find(b => b.id == id);
+            if(book) {
+                book.author = author;
+                book.title = title;
+                book.tags = tags;
+                book.year = year;
+                book.rating = rating;
+            }
+        } else {
+            // Ajout
+            const newId = books.length > 0 ? Math.max(...books.map(b => b.id)) + 1 : 1;
+            books.push({ id: newId, author, title, tags, year, rating });
+        }
+
+        saveData();
+        closeModal('book-modal');
+        if (currentView === 'books') renderBooks();
+        if (currentView === 'authors') renderAuthors();
+    }
+
+    function deleteCurrentBook() {
+        const id = document.getElementById('book-edit-id').value;
+        if(id && confirm("Voulez-vous vraiment supprimer ce livre ?")) {
+            books = books.filter(b => b.id != id);
+            saveData();
+            closeModal('book-modal');
+            if (currentView === 'books') renderBooks();
+            if (currentView === 'authors') renderAuthors();
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    // Initialisation au chargement
+    renderBooks();
+</script>
+
 </body>
 </html>
