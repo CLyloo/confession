@@ -124,7 +124,7 @@
         td {
             padding: 12px 8px;
             border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
+            vertical-align: middle;
         }
 
         tr.clickable-row {
@@ -137,11 +137,27 @@
         }
 
         /* Largeurs colonnes livres */
-        th.col-author, td.col-author { width: 26%; }
-        th.col-title, td.col-title { width: 34%; }
+        th.col-author, td.col-author { width: 24%; }
+        th.col-title, td.col-title { width: 36%; }
         th.col-tags, td.col-tags { width: 20%; font-family: 'Courier Prime', monospace; font-size: 0.85rem; color: #555; }
         th.col-year, td.col-year { width: 8%; text-align: right; font-family: 'Courier Prime', monospace; }
         th.col-rating, td.col-rating { width: 12%; text-align: right; font-family: 'Courier Prime', monospace; letter-spacing: 2px; }
+
+        /* Style de la vignette livre */
+        .book-cell-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .book-thumb {
+            width: 32px;
+            height: 45px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            background: #eee;
+            flex-shrink: 0;
+        }
 
         /* Largeurs colonnes auteurs (2 colonnes) */
         th.col-author-name, td.col-author-name { width: 70%; }
@@ -178,6 +194,8 @@
             width: 420px;
             max-width: 90%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-content h3 {
@@ -200,6 +218,21 @@
         .form-group input, .form-group select {
             width: 100%;
             box-sizing: border-box;
+        }
+
+        .cover-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .cover-preview {
+            width: 50px;
+            height: 70px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+            background: #eee;
         }
 
         .modal-buttons {
@@ -307,6 +340,13 @@
             <input type="text" id="input-title" placeholder="Ex: Les Misérables">
         </div>
         <div class="form-group">
+            <label>Couverture (Image) :</label>
+            <div class="cover-preview-container">
+                <img id="cover-preview" class="cover-preview" src="" alt="Aperçu">
+                <input type="file" id="input-cover" accept="image/*" onchange="previewCoverImage(event)">
+            </div>
+        </div>
+        <div class="form-group">
             <label>Descripteurs (#séparés par des espaces) :</label>
             <input type="text" id="input-tags" placeholder="#Classics #France #Fiction">
         </div>
@@ -350,17 +390,18 @@
 
 <script>
     let books = JSON.parse(localStorage.getItem('my_books_data')) || [
-        { id: 1, author: "Luc Ferrari", title: "L'œuvre électronique", tags: "#Musique #Electro #Avangarde", year: 2009, rating: 5 },
-        { id: 2, author: "Orchestre et chœur de la Radio-Télévision de Cracovie", title: "Œuvre intégrale pour chœur et orchestre symphonique", tags: "#Classique #Symphonie", year: 1990, rating: 5 },
-        { id: 3, author: "Bernard Parmegiani", title: "L'œuvre musicale", tags: "#Electro #Acousmatique", year: 2008, rating: 5 },
-        { id: 4, author: "Henri Pousseur", title: "Paysages planétaires", tags: "#Classique #Contemporain", year: 2004, rating: 4 },
-        { id: 5, author: "Victor Hugo", title: "Les Misérables", tags: "#Classics #France #Fiction #19thCentury", year: 1862, rating: 5 },
-        { id: 6, author: "Gustave Flaubert", title: "Madame Bovary", tags: "#Classics #France #Fiction", year: 1857, rating: 4 }
+        { id: 1, author: "Luc Ferrari", title: "L'œuvre électronique", tags: "#Musique #Electro #Avangarde", year: 2009, rating: 5, cover: "" },
+        { id: 2, author: "Orchestre et chœur de la Radio-Télévision de Cracovie", title: "Œuvre intégrale pour chœur et orchestre symphonique", tags: "#Classique #Symphonie", year: 1990, rating: 5, cover: "" },
+        { id: 3, author: "Bernard Parmegiani", title: "L'œuvre musicale", tags: "#Electro #Acousmatique", year: 2008, rating: 5, cover: "" },
+        { id: 4, author: "Henri Pousseur", title: "Paysages planétaires", tags: "#Classique #Contemporain", year: 2004, rating: 4, cover: "" },
+        { id: 5, author: "Victor Hugo", title: "Les Misérables", tags: "#Classics #France #Fiction #19thCentury", year: 1862, rating: 5, cover: "" },
+        { id: 6, author: "Gustave Flaubert", title: "Madame Bovary", tags: "#Classics #France #Fiction", year: 1857, rating: 4, cover: "" }
     ];
 
     let currentView = 'books';
     let currentSort = { field: 'author', asc: true };
     let currentAuthorSort = { field: 'name', asc: true };
+    let tempCoverBase64 = "";
 
     function saveData() {
         localStorage.setItem('my_books_data', JSON.stringify(books));
@@ -376,6 +417,19 @@
 
         if (view === 'books') renderBooks();
         if (view === 'authors') renderAuthors();
+    }
+
+    // --- GESTION DES IMAGES ---
+    function previewCoverImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempCoverBase64 = e.target.result;
+                document.getElementById('cover-preview').src = tempCoverBase64;
+            };
+            reader.readAsDataURL(file);
+        }
     }
 
     // --- GESTION DES LIVRES ---
@@ -418,9 +472,16 @@
                 return `<span class="tag-badge" onclick="event.stopPropagation(); filterByTag('${tag}')">${tag}</span>`;
             }).join(' ');
 
+            let coverImgHtml = book.cover ? `<img src="${book.cover}" class="book-thumb" alt="">` : `<div class="book-thumb"></div>`;
+
             tr.innerHTML = `
                 <td class="col-author">${escapeHtml(book.author)}</td>
-                <td class="col-title">${escapeHtml(book.title)}</td>
+                <td class="col-title">
+                    <div class="book-cell-content">
+                        ${coverImgHtml}
+                        <span>${escapeHtml(book.title)}</span>
+                    </div>
+                </td>
                 <td class="col-tags">${tagsHtml}</td>
                 <td class="col-year">${book.year}</td>
                 <td class="col-rating">${'★'.repeat(book.rating)}${'☆'.repeat(5 - book.rating)}</td>
@@ -535,10 +596,16 @@
             div.style.display = "flex";
             div.style.justifyContent = "space-between";
             div.style.alignItems = "center";
+            
+            let coverImgHtml = b.cover ? `<img src="${b.cover}" class="book-thumb" alt="">` : `<div class="book-thumb"></div>`;
+
             div.innerHTML = `
-                <div>
-                    <strong>${escapeHtml(b.title)}</strong> (${b.year})<br>
-                    <span style="font-size:0.8rem; color:#666;">${b.tags}</span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${coverImgHtml}
+                    <div>
+                        <strong>${escapeHtml(b.title)}</strong> (${b.year})<br>
+                        <span style="font-size:0.8rem; color:#666;">${b.tags}</span>
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span>${'★'.repeat(b.rating)}${'☆'.repeat(5 - b.rating)}</span>
@@ -560,6 +627,9 @@
         document.getElementById('input-tags').value = '#';
         document.getElementById('input-year').value = new Date().getFullYear();
         document.getElementById('input-rating').value = '5';
+        document.getElementById('input-cover').value = '';
+        tempCoverBase64 = "";
+        document.getElementById('cover-preview').src = "";
         document.getElementById('delete-book-btn').style.display = 'none';
         document.getElementById('book-modal').style.display = 'flex';
     }
@@ -574,6 +644,11 @@
         document.getElementById('input-tags').value = book.tags;
         document.getElementById('input-year').value = book.year;
         document.getElementById('input-rating').value = book.rating;
+        document.getElementById('input-cover').value = '';
+        
+        tempCoverBase64 = book.cover || "";
+        document.getElementById('cover-preview').src = tempCoverBase64;
+
         document.getElementById('delete-book-btn').style.display = 'block';
         document.getElementById('book-modal').style.display = 'flex';
     }
@@ -599,10 +674,11 @@
                 book.tags = tags;
                 book.year = year;
                 book.rating = rating;
+                book.cover = tempCoverBase64;
             }
         } else {
             const newId = books.length > 0 ? Math.max(...books.map(b => b.id)) + 1 : 1;
-            books.push({ id: newId, author, title, tags, year, rating });
+            books.push({ id: newId, author, title, tags, year, rating, cover: tempCoverBase64 });
         }
 
         saveData();
