@@ -157,6 +157,12 @@
             border: 1px solid var(--border-color);
             background: #eee;
             flex-shrink: 0;
+            cursor: zoom-in;
+            transition: opacity 0.15s;
+        }
+
+        .book-thumb:hover {
+            opacity: 0.8;
         }
 
         /* Largeurs colonnes auteurs (2 colonnes) */
@@ -233,6 +239,7 @@
             object-fit: cover;
             border: 1px solid var(--border-color);
             background: #eee;
+            cursor: zoom-in;
         }
 
         .modal-buttons {
@@ -248,6 +255,30 @@
         .delete-btn:hover {
             background-color: #b00;
             color: #fff;
+        }
+
+        /* Modal Zoom Image */
+        #zoom-modal {
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+        }
+
+        .zoom-content {
+            background: none;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            text-align: center;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .zoom-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            border: 2px solid #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -342,7 +373,7 @@
         <div class="form-group">
             <label>Couverture (Image) :</label>
             <div class="cover-preview-container">
-                <img id="cover-preview" class="cover-preview" src="" alt="Aperçu">
+                <img id="cover-preview" class="cover-preview" src="" alt="Aperçu" onclick="zoomCover(this.src)">
                 <input type="file" id="input-cover" accept="image/*" onchange="previewCoverImage(event)">
             </div>
         </div>
@@ -385,6 +416,13 @@
             <span></span>
             <button type="button" onclick="closeModal('author-modal')">Fermer</button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL ZOOM IMAGE -->
+<div id="zoom-modal" class="modal" onclick="closeModal('zoom-modal')">
+    <div class="zoom-content">
+        <img id="zoomed-image" src="" alt="Couverture en grand">
     </div>
 </div>
 
@@ -432,6 +470,12 @@
         }
     }
 
+    function zoomCover(url) {
+        if (!url) return;
+        document.getElementById('zoomed-image').src = url;
+        document.getElementById('zoom-modal').style.display = 'flex';
+    }
+
     // --- GESTION DES LIVRES ---
     function renderBooks() {
         const tbody = document.getElementById('books-tbody');
@@ -472,7 +516,7 @@
                 return `<span class="tag-badge" onclick="event.stopPropagation(); filterByTag('${tag}')">${tag}</span>`;
             }).join(' ');
 
-            let coverImgHtml = book.cover ? `<img src="${book.cover}" class="book-thumb" alt="">` : `<div class="book-thumb"></div>`;
+            let coverImgHtml = book.cover ? `<img src="${book.cover}" class="book-thumb" alt="" onclick="event.stopPropagation(); zoomCover('${book.cover}')">` : `<div class="book-thumb"></div>`;
 
             tr.innerHTML = `
                 <td class="col-author">${escapeHtml(book.author)}</td>
@@ -597,7 +641,7 @@
             div.style.justifyContent = "space-between";
             div.style.alignItems = "center";
             
-            let coverImgHtml = b.cover ? `<img src="${b.cover}" class="book-thumb" alt="">` : `<div class="book-thumb"></div>`;
+            let coverImgHtml = b.cover ? `<img src="${b.cover}" class="book-thumb" alt="" onclick="event.stopPropagation(); zoomCover('${b.cover}')">` : `<div class="book-thumb"></div>`;
 
             div.innerHTML = `
                 <div style="display: flex; align-items: center; gap: 10px;">
